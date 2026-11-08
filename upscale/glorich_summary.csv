@@ -1,0 +1,32 @@
+,0
+stations,2957.0
+samples,169432.0
+median_S,4.552685115118406
+S_q25,2.9197093250654307
+S_q75,7.036177210100065
+frac_S_gt1,0.9912073047007102
+frac_S_gt3,0.7362191410213054
+median_frac_samples_under,0.0
+frac_stations_some_under,0.1345958741968211
+SSP2-4.5 inwater: median metab/atm,0.359428964842241
+SSP2-4.5 inwater: frac metab>=atm,0.09469056476158269
+SSP2-4.5 inwater: frac metab>=0.4 atm,0.4504565437943862
+SSP2-4.5 inwater: median pH response vs ocean-like,0.33946310479009073
+SSP2-4.5 allresp: median metab/atm,1.1980965494741367
+SSP2-4.5 allresp: frac metab>=atm,0.5908014879945891
+SSP2-4.5 allresp: frac metab>=0.4 atm,0.8782549881636794
+SSP2-4.5 allresp: median pH response vs ocean-like,0.5346331699949435
+SSP5-8.5 inwater: median metab/atm,0.2277577634528334
+SSP5-8.5 inwater: frac metab>=atm,0.02874535001690903
+SSP5-8.5 inwater: frac metab>=0.4 atm,0.23435914778491715
+SSP5-8.5 inwater: median pH response vs ocean-like,0.3807324675741653
+SSP5-8.5 allresp: median metab/atm,0.7591925448427782
+SSP5-8.5 allresp: frac metab>=atm,0.3618532296246195
+SSP5-8.5 allresp: frac metab>=0.4 atm,0.7669935745688198
+SSP5-8.5 allresp: median pH response vs ocean-like,0.5116535475826052
+soft stations,924.0
+soft median S,4.334121158323672
+soft SSP2-4.5 inwater median R,0.32613574246439747
+soft SSP2-4.5 allresp median R,1.0871191415479913
+soft SSP5-8.5 inwater median R,0.2055855710961942
+soft SSP5-8.5 allresp median R,0.6852852369873139
