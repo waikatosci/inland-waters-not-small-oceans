@@ -1,0 +1,53 @@
+level,element,cls,k,studies,median,q25,q75,min,max,phi_median,phi_q25,phi_q75
+element,Mn,Published measurements in natural water,32,13,-0.26165,-0.355475,-0.079525,-1.3092,0.549,0.130825,0.1777375,0.0397625
+element,Mn,"Oxide model (HFO), dissolved",6,6,-0.01755,-0.03195,-0.013875,-0.0385,-0.01,0.008775,0.015975,0.0069375
+element,Mn,"Organic matter and oxide model (NICA-Donnan), free ion",54,18,-0.01715,-0.032375,-0.006,-0.0839,-0.0009,0.008575,0.0161875,0.003
+element,Fe,Published measurements in natural water,11,7,-0.155,-0.306,-0.0477,-0.353,1.5983,0.0775,0.153,0.02385
+element,Co,Published measurements in natural water,1,1,-0.139,-0.139,-0.139,-0.139,-0.139,0.0695,0.0695,0.0695
+element,Co,"Oxide model (HFO), dissolved",6,6,-0.026099999999999998,-0.044625,-0.019275,-0.0522,-0.0147,0.013049999999999999,0.0223125,0.0096375
+element,Co,"Organic matter and oxide model (NICA-Donnan), free ion",54,18,-0.0494,-0.055349999999999996,-0.03535,-0.0967,-0.0169,0.0247,0.027674999999999998,0.017675
+element,Ni,Published measurements in natural water,14,6,-0.14250000000000002,-0.27325,-0.07775,-0.834,0.874,0.07125000000000001,0.136625,0.038875
+element,Ni,Published laboratory and model results,9,7,-0.42,-0.49,-0.317,-1.05,-0.1,0.21,0.245,0.1585
+element,Ni,"Oxide model (HFO), dissolved",6,6,-0.09025,-0.15794999999999998,-0.06575,-0.1871,-0.0481,0.045125,0.07897499999999999,0.032875
+element,Ni,"Organic matter and oxide model (NICA-Donnan), free ion",54,18,-0.1562,-0.224575,-0.101275,-0.3446,-0.0471,0.0781,0.1122875,0.0506375
+element,Cu,Published measurements in natural water,28,13,-0.118,-0.22375,-0.022125,-0.852,0.456,0.059,0.111875,0.0110625
+element,Cu,Published laboratory and model results,10,8,-0.921,-1.34275,-0.3325,-2.679,0.24,0.4605,0.671375,0.16625
+element,Cu,"Oxide model (HFO), dissolved",6,6,-0.3617,-0.481375,-0.31582499999999997,-0.5356,-0.2054,0.18085,0.2406875,0.15791249999999998
+element,Cu,"Organic matter and oxide model (NICA-Donnan), free ion",54,18,-1.7604,-1.8021,-1.6220249999999998,-1.9129,-1.4284,0.8802,0.90105,0.8110124999999999
+element,Zn,Published measurements in natural water,54,19,-0.39025,-0.63465,-0.07225,-1.6675,0.434,0.195125,0.317325,0.036125
+element,Zn,Published laboratory and model results,10,8,-0.52,-0.6175,-0.1875,-1.239,0.896,0.26,0.30875,0.09375
+element,Zn,"Oxide model (HFO), dissolved",6,6,-0.24319999999999997,-0.36819999999999997,-0.18967499999999998,-0.4258,-0.1471,0.12159999999999999,0.18409999999999999,0.09483749999999999
+element,Zn,"Organic matter and oxide model (NICA-Donnan), free ion",54,18,-0.18814999999999998,-0.3082,-0.0757,-0.4721,-0.0431,0.09407499999999999,0.1541,0.03785
+element,Cd,Published measurements in natural water,24,9,-0.13415,-0.3172,-0.02075,-1.0516,0.577,0.067075,0.1586,0.010375
+element,Cd,Published laboratory and model results,9,7,-0.46,-0.49,-0.42,-1.271,0.035,0.23,0.245,0.21
+element,Cd,"Oxide model (HFO), dissolved",6,6,-0.08505,-0.15207500000000002,-0.06692500000000001,-0.1829,-0.0473,0.042525,0.07603750000000001,0.033462500000000006
+element,Cd,"Organic matter and oxide model (NICA-Donnan), free ion",54,18,-0.21539999999999998,-0.2497,-0.1572,-0.3075,-0.0929,0.10769999999999999,0.12485,0.0786
+element,Pb,Published measurements in natural water,16,6,-0.0915,-0.4575,0.006250000000000001,-1.208,1.33,0.04575,0.22875,-0.0031250000000000006
+element,Pb,Published laboratory and model results,10,8,-0.9199999999999999,-1.29475,-0.2875,-1.649,0.086,0.45999999999999996,0.647375,0.14375
+element,Pb,"Oxide model (HFO), dissolved",6,6,-0.1562,-0.2834,-0.12207499999999999,-0.402,-0.0911,0.0781,0.1417,0.061037499999999995
+element,Pb,"Organic matter and oxide model (NICA-Donnan), free ion",54,18,-1.0179,-1.0305,-0.92655,-1.0539,-0.8032,0.50895,0.51525,0.463275
+element,P,Published measurements in natural water,4,3,0.0307922604919728,-0.06011214036087066,0.0900633907379592,-0.19754856144348265,0.1326,0.0205281736613152,-0.04007476024058044,0.0600422604919728
+element,P,Published laboratory and model results,8,2,0.312,0.1555,0.56575,0.145,0.664,0.208,0.10366666666666667,0.37716666666666665
+element,P,"Oxide model (HFO), dissolved",6,6,0.3477,0.073325,0.5719,0.0126,0.6254,0.2318,0.048883333333333334,0.38126666666666664
+element,As,Published measurements in natural water,17,5,0.14,0.0841,0.1856,-0.1814,0.2713,0.09333333333333334,0.05606666666666666,0.12373333333333332
+element,As,Published laboratory and model results,3,2,0.528,0.3265,0.648,0.125,0.768,0.35200000000000004,0.21766666666666667,0.432
+element,As,"Oxide model (HFO), dissolved",6,6,-0.16785,-0.5777749999999999,0.17105,-0.6759,0.4331,-0.1119,-0.38518333333333327,0.11403333333333333
+element,As(III),Published laboratory and model results,17,1,-0.225,-0.361,-0.082,-0.449,0.196,,,
+element,V,Published laboratory and model results,7,2,0.179,0.0825,0.3125,0.013,0.598,0.179,0.0825,0.3125
+element,V,"Oxide model (HFO), dissolved",6,6,-0.5138499999999999,-0.54645,-0.39485,-0.5768,-0.1427,-0.5138499999999999,-0.54645,-0.39485
+element,Mo,Published laboratory and model results,6,1,0.371,0.27225,0.57625,0.202,1.239,0.1855,0.136125,0.288125
+element,Mo,"Oxide model (HFO), dissolved",6,6,0.0048,0.00045,0.009225,0.0001,0.0101,0.0024,0.000225,0.0046125
+element,W,Published laboratory and model results,5,1,0.826,0.343,0.883,0.183,1.488,0.413,0.1715,0.4415
+element,U,Published measurements in natural water,11,2,0.048,-0.04085,0.24505,-0.39,1.629,,,
+element,U,Published laboratory and model results,2,2,0.905,0.4525,1.3575,-0.0,1.81,,,
+class,divalent cations (no Fe),"Oxide model (HFO), dissolved",42,6,-0.1038,-0.22549999999999998,-0.0475,-0.5356,-0.01,0.0519,0.11274999999999999,0.02375
+class,divalent cations (no Fe),"Organic matter and oxide model (NICA-Donnan), free ion",378,18,-0.18264999999999998,-0.921075,-0.052724999999999994,-1.9129,-0.0009,0.09132499999999999,0.4605375,0.026362499999999997
+class,divalent cations (no Fe),Field: labile or dissolved concentration,64,9,-0.1175,-0.28975,0.0775,-1.208,1.33,0.05875,0.144875,-0.03875
+class,divalent cations (no Fe),Field: labile or free fraction,31,8,-0.086,-0.221,-0.0195,-0.761,0.263,0.043,0.1105,0.00975
+class,divalent cations (no Fe),Acid drainage: dilution-corrected,8,2,-0.14500000000000002,-0.19675,-0.0705,-0.279,-0.066,0.07250000000000001,0.098375,0.03525
+class,divalent cations (no Fe),"Diel cycle, temperature held constant",30,5,-0.2942,-0.45425000000000004,-0.13995000000000002,-0.9987,0.5201,0.1471,0.22712500000000002,0.06997500000000001
+class,divalent cations (no Fe),Diel cycle (pH and temperature),34,9,-0.4237,-0.796425,-0.28645,-1.6675,-0.0133,0.21185,0.3982125,0.143225
+class,divalent cations (no Fe),pH experiment,2,1,-0.9695,-1.00475,-0.93425,-1.04,-0.899,0.48475,0.502375,0.467125
+class,divalent cations (no Fe),Soil: dissolved at fixed total,10,2,-0.42500000000000004,-0.5225,-0.2875,-1.05,-0.18,0.21250000000000002,0.26125,0.14375
+class,divalent cations (no Fe),"Sorption at fixed total (lab, natural oxides)",10,2,-0.421,-1.14575,-0.025,-1.621,0.24,0.2105,0.572875,0.0125
+class,divalent cations (no Fe),Published free-ion models,28,6,-0.5700000000000001,-1.1424999999999998,-0.40499999999999997,-2.679,0.896,0.28500000000000003,0.5712499999999999,0.20249999999999999

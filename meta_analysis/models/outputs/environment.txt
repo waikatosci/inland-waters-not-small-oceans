@@ -1,0 +1,15 @@
+python 3.11.15 on Linux-6.18.44-fc-v77-x86_64-with-glibc2.39
+numpy 2.4.4, scipy 1.17.1, pandas 3.0.2, matplotlib 3.10.9
+phreeqpython 1.6.2 (pip show)
+IPhreeqc library bundled with phreeqpython: 3.7.3-15968  (/usr/local/lib/python3.11/dist-packages/phreeqpython/lib/viphreeqc.so)
+PyPI package phreeqc 1.1.1: IPhreeqc 3.8.6-17100 (primary engine)
+
+Databases (source: https://github.com/usgs-coupled/phreeqc3/tree/master/database, fetched 2026-10-07)
+  phreeqc.dat          md5 07ba2ffc13d8e52eb35d4f992955e877 OK; LOAD FAILED: Database load errors:
+  wateq4f.dat          md5 d5d847569dcd20a19d4ae078910c7c60 OK; loads in IPhreeqc
+  minteq.dat           md5 75e046ac2fe4f5a9afe2230e80cb1248 OK; loads in IPhreeqc
+  minteq.v4.dat        md5 963c33b858001ff7be7121e9f38acd93 OK; loads in IPhreeqc
+  llnl.dat             md5 b11e0d44aa3635395125420e7313a466 OK; loads in IPhreeqc
+  Tipping_Hurley.dat   md5 9b2a682a37fe5ddcf08edcda2859630e OK; loads in IPhreeqc
+
+Databases bundled inside phreeqpython (/usr/local/lib/python3.11/dist-packages/phreeqpython/database): phreeqc.dat, pitzer.dat, vitens.dat, wateq4f_PWN.dat

@@ -1,0 +1,350 @@
+"""Part A: write the literature tables for published speciation-model outputs.
+
+1. Slopes that can be computed from TABULATED published model output (only USGS PHREEQC Example 8 was
+   accessible with per-pH numbers: Dzombak & Morel-type diffuse-layer model, Zn on hydrous ferric oxide).
+   Read from validation/usgs_ex8/ex8.sel (reference selected output distributed with PHREEQC, fetched
+   2026-10-07 from https://raw.githubusercontent.com/usgs-coupled/phreeqc3/master/examples/ex8.sel).
+2. Qualitative rows (direction or range stated in text only).
+3. Candidate list (everything identified, with access status). Bibliographic details marked
+   "not verified" were recalled, not checked in this session (web search budget exhausted; Crossref
+   rate-limited) and must be checked before citation.
+
+Writes ../extractions/models_lit_slopes.csv and models_lit_candidates.csv
+"""
+import os
+
+import numpy as np
+import pandas as pd
+from scipy import stats
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(HERE)
+META = os.path.dirname(ROOT)
+EXT = os.path.join(META, "extractions")
+
+SLOPE_COLS = ["study_id", "authors", "year", "title", "journal", "doi", "access", "water_body", "country", "water_type",
+              "design", "metal", "measure", "binding_layer", "pH_min", "pH_max", "n", "slope", "slope_se", "ci_low",
+              "ci_high", "r", "p_value", "slope_source", "DOC_mgL", "Ca_mgL_or_hardness", "alkalinity", "temp_C_range",
+              "location_in_paper", "notes", "quality"]
+CAND_COLS = ["study_id", "authors", "year", "title", "journal", "doi", "why_relevant", "access", "data_expected"]
+
+
+def ex8_rows():
+    sel = pd.read_csv(os.path.join(ROOT, "validation", "usgs_ex8", "ex8.sel"), sep="\t")
+    sel.columns = [c.strip() for c in sel.columns]
+    sel = sel[sel["state"].str.strip() == "react"].copy()
+    base = dict(study_id="ParkhurstAppelo2013_ex8", authors="Parkhurst DL, Appelo CAJ", year=2013,
+                title="Description of input and examples for PHREEQC version 3 - a computer program for speciation, "
+                      "batch-reaction, one-dimensional transport, and inverse geochemical calculations (Example 8: "
+                      "surface complexation of zinc on hydrous ferric oxide)",
+                journal="U.S. Geological Survey Techniques and Methods, book 6, chap. A43", doi="10.3133/tm6a43",
+                access="open", water_body="synthetic 0.1 mol/kgw NaNO3 solution (no natural water)", country="",
+                water_type="lab_synthetic", design="model_comparison", binding_layer="", DOC_mgL=0,
+                Ca_mgL_or_hardness=0, alkalinity="none (closed system, no CO2; pH fixed with NaOH)", temp_C_range="25",
+                quality="A")
+    rows = []
+    for soln, ztot in [(1, 1e-7), (2, 1e-4)]:
+        g = sel[sel["soln"] == soln].sort_values("pH")
+        g = g[(g.pH >= 6.5 - 1e-9) & (g.pH <= 8.0 + 1e-9)]
+        sorbed = g["m_Hfo_wOZn+"] + g["m_Hfo_sOZn+"]
+        dissolved = ztot - sorbed          # total Zn is fixed (input), dissolved = total - sorbed
+        for measure, y, what in [("model_dissolved", np.log10(dissolved), "dissolved Zn = total - sorbed"),
+                                 ("model_free_ion", np.log10(g["m_Zn+2"]), "free Zn2+ molality (m_Zn+2)")]:
+            res = stats.linregress(g.pH.values, y.values)
+            rows.append(dict(base, metal="Zn", measure=measure, pH_min=6.5, pH_max=8.0, n=len(g),
+                             slope=round(res.slope, 3), slope_se=round(res.stderr, 3), ci_low="", ci_high="",
+                             r=round(res.rvalue, 4), p_value=f"{res.pvalue:.1e}", slope_source="computed_from_table",
+                             location_in_paper="Example 8; reference selected-output file ex8.sel (PHREEQC distribution, "
+                                               "usgs-coupled/phreeqc3 examples/ex8.sel), rows 'react', soln "
+                                               f"{soln}",
+                             notes=(f"Total Zn {ztot:g} mol/kgw; {what}; least-squares slope of log10 values on pH at "
+                                    "0.25-pH steps 6.5-8.0. Two-site diffuse-layer (Dzombak & Morel-type) model with "
+                                    "Example-8 constants (pKa1 7.18, pKa2 8.82; Zn log K 0.66 strong, -2.32 weak; these "
+                                    "differ from the D&M 1990 best estimates 0.99/-1.99 carried in phreeqc.dat). HFO "
+                                    "0.09 g/kgw (about 1e-3 mol Fe), 5e-6 mol strong + 2e-4 mol weak sites, 600 m2/g, "
+                                    "I = 0.1. Lab-type sorbent excess, so the edge is far steeper than in natural "
+                                    "waters (compare models_own_slopes.csv). Slope computed by this study from the "
+                                    "tabulated model output; not a natural water. Curve is not linear over the window "
+                                    "(edge), r reported is Pearson on log10 values.")))
+    return rows
+
+
+QUAL_ROWS = [
+    dict(study_id="UkotijeIkwut2023", authors="Ukotije-Ikwut PR, Steiner Z, Gledhill M, Muller M, Oakes JM, Sukri RS, "
+                                              "Jiang S, Achterberg EP",
+         year=2023, title="The distribution and behaviour of Fe, Al, Si, Mn, Cu and Ni in ombrotrophic tropical peat "
+                          "draining blackwater estuaries on Borneo Island",
+         journal="Frontiers in Marine Science 9 (article 1075155; volume year 2022, published 9 Jan 2023)",
+         doi="10.3389/fmars.2022.1075155", access="open",
+         water_body="Maludam and Sebuyau rivers and estuaries (blackwater, peat-draining)", country="Borneo (site country not verified)",
+         water_type="estuary_fresh", design="model_comparison", metal="Cu",
+         measure="other (Visual MINTEQ 3.0 NICA-Donnan modelled percent of dissolved metal bound to DOM)",
+         binding_layer="", pH_min=3.3, pH_max="", n="", slope="", slope_se="", ci_low="", ci_high="", r="", p_value="",
+         slope_source="qualitative_only", DOC_mgL="", Ca_mgL_or_hardness="", alkalinity="", temp_C_range="ambient",
+         location_in_paper="Results text accompanying Fig. 8; Table 3 (NICA constants)",
+         notes=("Quoted: 'We calculated 100% Fe and 98-100% Cu bound to DOM in Maludam, and 70-100% Fe and 96-100% Cu "
+                "bound to DOM in Sebuyau river and estuaries.' and 'The percentage of Fe and Cu bound to DOM at pH 3.3 - "
+                "6 varied (70-100%), however, at higher pH (> 6) it became stable at 90-100%.' Implies the modelled "
+                "non-DOM (inorganic) Cu fraction is small (<= 4%) and least variable above pH 6; no slope given; salinity "
+                "co-varies with pH along the estuaries. Generic FA constants listed in Table 3 for Cu (n1 0.63, log K2 "
+                "7.26 as printed) differ from those reproduced by Xu et al. 2016 (n1 0.53, log K2 8.26)."),
+         quality="C"),
+    dict(study_id="UkotijeIkwut2023", authors="Ukotije-Ikwut PR, Steiner Z, Gledhill M, Muller M, Oakes JM, Sukri RS, "
+                                              "Jiang S, Achterberg EP",
+         year=2023, title="The distribution and behaviour of Fe, Al, Si, Mn, Cu and Ni in ombrotrophic tropical peat "
+                          "draining blackwater estuaries on Borneo Island",
+         journal="Frontiers in Marine Science 9 (article 1075155; volume year 2022, published 9 Jan 2023)",
+         doi="10.3389/fmars.2022.1075155", access="open",
+         water_body="Maludam and Sebuyau rivers and estuaries (blackwater, peat-draining)", country="Borneo (site country not verified)",
+         water_type="estuary_fresh", design="model_comparison", metal="Fe",
+         measure="other (Visual MINTEQ 3.0 NICA-Donnan modelled percent of dissolved Fe bound to DOM)",
+         binding_layer="", pH_min=3.3, pH_max="", n="", slope="", slope_se="", ci_low="", ci_high="", r="", p_value="",
+         slope_source="qualitative_only", DOC_mgL="", Ca_mgL_or_hardness="", alkalinity="", temp_C_range="ambient",
+         location_in_paper="Results text accompanying Fig. 8",
+         notes=("Same quotes as the Cu row: 70-100% of Fe bound to DOM at pH 3.3-6 (variable), 90-100% above pH 6. "
+                "Fe redox state in the model not stated in the quoted text. Figure-only otherwise (Fig. 8)."),
+         quality="C"),
+]
+
+NV = " Citation recalled, NOT verified in this session (check before citing)."
+CANDIDATES = [
+    ("Unsworth2006", "Unsworth ER, Warnken KW, Zhang H, Davison W, Black F, Buffle J, Cao J, Cleven R, Galceran J, Gunkel P, "
+     "Kalis E, Kistler D, van Leeuwen HP, Martin M, Noel S, Nur Y, Odzak N, Puy J, van Riemsdijk W, Sigg L, Temminghoff E, "
+     "Tercier-Waeber ML, Toepperwien S, Town RM, Weng L, Xue H", 2006,
+     "Model predictions of metal speciation in freshwaters compared to measurements by in situ techniques",
+     "Environmental Science & Technology 40(6):1942-1949", "10.1021/es051246c",
+     "Lead named in the brief. Speciation-model predictions compared with in situ measurements in fresh waters "
+     "(multi-laboratory study). Metadata verified via Crossref.",
+     "not_accessed", "From title only (not seen): predicted vs measured free/labile metal at a few freshwater sites, "
+     "probably one pH per site, so a pH slope is unlikely without the SI. Obtain PDF and SI."),
+    ("LoftsTipping2011", "Lofts S, Tipping E", 2011,
+     "Assessing WHAM/Model VII against field measurements of free metal ion concentrations: model performance and the "
+     "role of uncertainty in parameters and inputs", "Environmental Chemistry 8(5):501-516", "10.1071/en11049",
+     "Lead. WHAM/Model VII vs field free-ion measurements. Abstract (Crossref): best agreement for Al, Co, Ni, Zn and Cd; "
+     "voltammetric measurements systematically higher than predictions.",
+     "abstract_only", "Per-sample observed and predicted free-ion concentrations from a compiled field dataset (probably "
+     "in SI); model-predicted free ion vs pH and residual-vs-pH would give model_free_ion slopes. Obtain PDF and SI."),
+    ("Tipping2002GCA", "Tipping E, Rey-Castro C, Bryan SE, Hamilton-Taylor J", 2002,
+     "Al(III) and Fe(III) binding by humic substances in freshwaters, and implications for trace metal speciation",
+     "Geochimica et Cosmochimica Acta 66(18):3211-3224", "10.1016/s0016-7037(02)00930-4",
+     "Lead (Tipping's pH-sensitivity work). Competition by Al and Fe(III) changes how trace-metal binding to humic matter "
+     "responds to pH in fresh waters. Metadata verified via Crossref.",
+     "not_accessed", "Model calculations of trace-metal free or bound fractions vs pH with and without Al/Fe(III) "
+     "competition (expected figure-only; digitise)."),
+    ("Tipping2005Geoderma", "Tipping E", 2005,
+     "Modelling Al competition for heavy metal binding by dissolved organic matter in soil and surface waters of acid and "
+     "neutral pH", "Geoderma 127:293-304 (not verified)", "",
+     "Lead (WHAM pH sensitivity incl. Al competition, acid to neutral surface waters)." + NV,
+     "not_accessed", "Modelled free-ion fractions of Cu, Zn, Cd, Ni, Pb vs pH with/without Al competition (expected figures)."),
+    ("Tipping1998ModelVI", "Tipping E", 1998,
+     "Humic ion-binding Model VI: an improved description of the interactions of protons and metal ions with humic "
+     "substances", "Aquatic Geochemistry 4:3-48 (not verified)", "",
+     "WHAM Model VI parameterisation; pH dependence of metal binding. Crossref lookup refused (HTTP 429)." + NV,
+     "not_accessed", "Figures of metal binding vs pH (figure-only)."),
+    ("TippingLoftsSonke2011", "Tipping E, Lofts S, Sonke JE", 2011,
+     "Humic Ion-Binding Model VII: a revised parameterisation of cation-binding by humic substances",
+     "Environmental Chemistry 8:225-235 (not verified)", "",
+     "WHAM7 parameters used by WHAM-FTOX and most recent WHAM applications. Crossref lookup refused (HTTP 429)." + NV,
+     "not_accessed", "Binding vs pH figures (figure-only)."),
+    ("Milne2003", "Milne CJ, Kinniburgh DG, van Riemsdijk WH, Tipping E", 2003,
+     "Generic NICA-Donnan model parameters for metal-ion binding by humic substances",
+     "Environmental Science & Technology 37(5):958-971", "10.1021/es0258879",
+     "Lead. Generic NICA-Donnan parameters for fulvic and humic acid (abstract: 171 datasets, 23 metal ions), used by "
+     "Visual MINTEQ, ECOSAT and ORCHESTRA. Needed to run Part B step 5. Metadata verified (NORA record).",
+     "not_accessed", "Parameter tables for FA and HA (log K1, n1, log K2, n2 per metal); binding vs pH figures. NORA has no "
+     "full text; ACS returned 403."),
+    ("Milne2001", "Milne CJ, Kinniburgh DG, Tipping E", 2001,
+     "Generic NICA-Donnan model parameters for proton binding by humic substances",
+     "Environmental Science & Technology 35(10):2049-2059", "10.1021/es000123j",
+     "Generic proton parameters for FA/HA (needed with Milne 2003). Metadata verified (NORA record).",
+     "not_accessed", "Qmax1, Qmax2, log KH1, log KH2, m1, m2, b for generic FA and HA."),
+    ("Gustafsson2003", "Gustafsson JP", 2003, "Modelling molybdate and tungstate adsorption to ferrihydrite",
+     "Chemical Geology 200(1-2):105-115", "10.1016/s0009-2541(03)00161-x",
+     "Lead (Gustafsson, molybdate on ferrihydrite). CD-MUSIC description of Mo and W adsorption to ferrihydrite; W has no "
+     "constants in any PHREEQC database inspected. Metadata verified via Crossref.",
+     "not_accessed", "Adsorption edges vs pH (lab, figures) and surface complexation constants usable for Mo and W."),
+    ("Larsson2017", "Larsson MA, Persson I, Sjostedt C, Gustafsson JP", 2017,
+     "Vanadate complexation to ferrihydrite: X-ray absorption spectroscopy and CD-MUSIC modelling",
+     "Environmental Chemistry 14 (not verified)", "",
+     "Lead (Gustafsson, vanadate on ferrihydrite). Would replace the poorly documented single V(V) surface species in "
+     "minteq.v4.dat (see models/README.md)." + NV,
+     "not_accessed", "V(V) adsorption edges vs pH and CD-MUSIC constants."),
+    ("Sjostedt2010", "Sjostedt CS, Gustafsson JP, Kohler SJ", 2010,
+     "Chemical equilibrium modeling of organic acids, pH, aluminum, and iron in Swedish surface waters",
+     "Environmental Science & Technology 44 (not verified)", "",
+     "Visual MINTEQ (SHM and NICA-Donnan) tested on surface waters across a pH range; calibrates the active-DOM to DOC "
+     "ratio used to convert DOC to model humic matter. Crossref lookup refused (HTTP 429)." + NV,
+     "not_accessed", "Model vs measured pH, Al and Fe(III) speciation; the ADOM/DOC convention for NICA-Donnan and SHM."),
+    ("MendezHiemstra2019", "Mendez JC, Hiemstra T", 2019,
+     "Carbonate adsorption to ferrihydrite: competitive interaction with phosphate for use in soil systems",
+     "ACS Earth and Space Chemistry 3(1):129-141", "10.1021/acsearthspacechem.8b00160",
+     "CD-MUSIC carbonate-phosphate competition on ferrihydrite as a function of pH and CO2: the mechanism that decides "
+     "the sign of the oxyanion slopes in our +CO3 vs noCO3 runs. Crossref lists a CC-BY-NC-ND licence. Metadata verified.",
+     "not_accessed", "Phosphate adsorption at different pCO2 and pH (model and data, figures); a test of whether the "
+     "Appelo et al. 2002 diffuse-layer carbonate constants overstate or understate CO2 competition."),
+    ("Stachowicz2008", "Stachowicz M, Hiemstra T, van Riemsdijk WH", 2008,
+     "Multi-competitive interaction of As(III) and As(V) oxyanions with Ca2+, Mg2+, PO43-, and CO32- ions on goethite",
+     "Journal of Colloid and Interface Science 320 (not verified)", "",
+     "CD-MUSIC competition between arsenate, phosphate, carbonate, Ca and Mg on goethite." + NV,
+     "not_accessed", "Arsenate adsorption vs pH under carbonate/Ca/Mg competition (figures)."),
+    ("Appelo2002", "Appelo CAJ, Van der Weiden MJJ, Tournassat C, Charlet L", 2002,
+     "Surface complexation of ferrous iron and carbonate on ferrihydrite and the mobilization of arsenic",
+     "Environmental Science & Technology 36(14):3096-3103", "10.1021/es010130n",
+     "Source of the hydrous ferric oxide carbonate constants in phreeqc.dat/wateq4f.dat (used in our +CO3 runs); "
+     "modelled arsenic mobilisation by carbonate. Metadata verified via Crossref.",
+     "not_accessed", "Modelled As sorption vs pCO2 and pH (figures)."),
+    ("Waite1994", "Waite TD, Davis JA, Payne TE, Waychunas GA, Xu N", 1994,
+     "Uranium(VI) adsorption to ferrihydrite: application of a surface complexation model",
+     "Geochimica et Cosmochimica Acta 58(24):5465-5478", "10.1016/0016-7037(94)90243-7",
+     "U(VI) on ferrihydrite including carbonate complexation; U was requested but has no constants in minteq.v4.dat "
+     "(wateq4f.dat has D&M uranyl constants, not run here). Metadata verified via Crossref.",
+     "not_accessed", "U(VI) adsorption edges vs pH at different pCO2 (figures)."),
+    ("DzombakMorel1990", "Dzombak DA, Morel FMM", 1990, "Surface Complexation Modeling: Hydrous Ferric Oxide",
+     "Wiley-Interscience, New York (book)", "",
+     "Primary source of the hydrous ferric oxide constants and site parameters used in Part B (as cited in the PHREEQC "
+     "databases). Needed for the literature check of computed sorption edges.",
+     "not_accessed", "Tables 5.7 and 10.1-10.10 (constants) and the sorption-edge figures to compare with "
+     "validation/dm_standard_conditions_edges.csv."),
+    ("ParkhurstAppelo2013", "Parkhurst DL, Appelo CAJ", 2013,
+     "Description of input and examples for PHREEQC version 3", "U.S. Geological Survey Techniques and Methods 6-A43",
+     "10.3133/tm6a43", "Example 8 (Zn on hydrous ferric oxide, diffuse-layer model): tabulated model output used for "
+     "the Zn rows in models_lit_slopes.csv and for the Part B validation. Metadata verified via Crossref.",
+     "open", "ex8.sel: Zn2+ and sorbed Zn at pH 5-8 (0.25 steps) for total Zn 1e-7 and 1e-4 mol/kgw."),
+    ("DiToro2001", "Di Toro DM, Allen HE, Bergman HL, Meyer JS, Paquin PR, Santore RC", 2001,
+     "Biotic ligand model of the acute toxicity of metals. 1. Technical basis",
+     "Environmental Toxicology and Chemistry 20(10):2383-2396", "10.1002/etc.5620201034",
+     "Lead (Biotic Ligand Model). Abstract: speciation by WHAM; competition of Ca and H with the toxic metal at the "
+     "biotic ligand; applied to Cu and Ag. Metadata verified via Crossref.",
+     "abstract_only", "Cu speciation and predicted toxicity vs pH (figures)."),
+    ("Santore2001", "Santore RC, Di Toro DM, Paquin PR, Allen HE, Meyer JS", 2001,
+     "Biotic ligand model of the acute toxicity of metals. 2. Application to acute copper toxicity in freshwater fish "
+     "and Daphnia", "Environmental Toxicology and Chemistry 20 (not verified)", "",
+     "Lead (BLM pH sensitivity for Cu)." + NV, "not_accessed", "Predicted LC50 and Cu speciation vs pH (figures)."),
+    ("DeSchamphelaereJanssen2002", "De Schamphelaere KAC, Janssen CR", 2002,
+     "A biotic ligand model predicting acute copper toxicity for Daphnia magna: the effects of calcium, magnesium, "
+     "sodium, potassium, and pH", "Environmental Science & Technology 36 (not verified)", "",
+     "Lead (BLM pH sensitivity, Cu)." + NV, "not_accessed", "EC50 and modelled Cu2+ activity vs pH (figures/tables)."),
+    ("Kalis2006", "Kalis EJJ, Weng LP, Dousma F, Temminghoff EJM, van Riemsdijk WH", 2006,
+     "Measuring free metal ion concentrations in situ in natural waters using the Donnan Membrane Technique",
+     "Environmental Science & Technology 40(3):955-961", "10.1021/es051435v",
+     "In situ free-ion measurements compared with an equilibrium speciation model; abstract: free ions 'were difficult "
+     "to predict using an equilibrium speciation model'. Metadata verified (WUR research portal).",
+     "abstract_only", "Measured vs predicted free Cu, Zn, Cd, Ni, Pb at a few natural waters."),
+    ("VanLaer2006", "Van Laer L, Smolders E, Degryse J (as listed in repository record), Janssen C, De Schamphelaere K",
+     2006, "Speciation of nickel in surface waters measured with the Donnan membrane technique",
+     "Analytica Chimica Acta 578(2):195-202", "",
+     "Free Ni2+ measured in surface waters; comparison with speciation-model predictions expected (not confirmed). "
+     "Metadata from the University of Adelaide repository record.",
+     "not_accessed", "Per-water pH, DOC and measured/predicted Ni2+ if tabulated."),
+    ("ReyCastro2009", "Rey-Castro C, Mongin S, Huidobro C, David C, Salvador J, Garces JL, Galceran J, Mas F, Puy J", 2009,
+     "Effective affinity distribution for the binding of metal ions to a generic fulvic acid in natural waters",
+     "Environmental Science & Technology 43(19):7184-7191", "10.1021/es803006p",
+     "Generic-FA NICA-Donnan binding of several metals under natural-water conditions, including pH dependence. "
+     "Metadata verified (Recercat record; full text restricted).",
+     "not_accessed", "Generic FA parameters used; effective affinity vs pH (figures)."),
+    ("XueSigg1999", "Xue H, Sigg L", 1999,
+     "Comparison of the complexation of Cu and Cd by humic or fulvic acids and by ligands observed in lake waters",
+     "Aquatic Geochemistry 5:313-335", "10.1023/A:1009679819002",
+     "WHAM and NICA model calculations for FA/HA compared with natural ligands in lake waters (Cu, Cd). Abstract read "
+     "on publisher page.", "abstract_only", "Modelled vs measured free Cu and Cd in lakes (single pH per lake)."),
+    ("Xu2016", "Xu J, Tan W, Xiong J, Wang M, Fang L, Koopal LK", 2016,
+     "Copper binding to soil fulvic and humic acids: NICA-Donnan modeling and conditional affinity spectra",
+     "Journal of Colloid and Interface Science 473:141-151", "",
+     "Table 1 reproduces the generic (Milne et al.) FA and HA parameters for H and Cu; used here to cross-check NICA-Donnan "
+     "parameters (Part B step 5).", "open", "Table 1: GFA b 0.57, Qmax1 5.88, p1 0.59, log KH1 2.34, nH1 0.66, log KCu1 0.26, "
+     "nCu1 0.53, Qmax2 1.86, p2 0.70, log KH2 8.60, nH2 0.76, log KCu2 8.26, nCu2 0.36 (as read)."),
+    ("UkotijeIkwut2023", "Ukotije-Ikwut PR, Steiner Z, Gledhill M, Muller M, Oakes JM, Sukri RS, Jiang S, Achterberg EP",
+     2023, "The distribution and behaviour of Fe, Al, Si, Mn, Cu and Ni in ombrotrophic tropical peat draining blackwater "
+     "estuaries on Borneo Island", "Frontiers in Marine Science 9", "10.3389/fmars.2022.1075155",
+     "Visual MINTEQ NICA-Donnan speciation of Fe, Al, Mn, Cu, Ni across pH about 3.3 to above 6 in blackwater rivers and "
+     "estuaries (qualitative rows in models_lit_slopes.csv).",
+     "open", "Fig. 8 (modelled DOM-bound fractions vs pH; figure-only, digitise); Table 3 NICA constants."),
+    ("Janot2017", "authors not recorded in this session", 2017,
+     "PEST-ORCHESTRA, a tool for optimising advanced ion-binding model parameters", "Environmental Chemistry 14(1):31",
+     "10.1071/EN16039", "ORCHESTRA distribution with default generic NICA-Donnan parameters (per the project web page); "
+     "a possible source of verified parameter files.", "not_accessed",
+     "ORCHESTRA database files with generic NICA-Donnan parameters (download blocked from this session)."),
+    ("Groenenberg2010", "Groenenberg JE, Koopmans GF, Comans RNJ", 2010,
+     "Uncertainty analysis of the nonideal competitive adsorption-Donnan model: effects of dissolved organic matter "
+     "variability on predicted metal speciation in soil solution", "journal not recorded (TNO repository PDF w10037)", "",
+     "NICA-Donnan prediction uncertainty from DOM variability; states generic Milne et al. parameters were used for all "
+     "elements except Fe(III)-FA. Soil solution, not fresh water.", "open",
+     "Table 2: fitted FA parameters (H, Cd, Cu, Pb) with uncertainties."),
+    ("AnnBot2010_PMC2887072", "authors not recorded in this session", 2010, "title not recorded in this session",
+     "Annals of Botany 105(7):1183-1197", "10.1093/aob/mcq098",
+     "Table A3 lists generic NICA-Donnan proton and Ca parameters for FA and HA (from Milne et al. 2001, 2003); used as a "
+     "second source for the proton/Ca values.", "open",
+     "Table A3: FA Qmax 5.88/1.86, nH 0.66/0.76, nCa 0.85/0.80, p 0.59/0.70, log KH 2.34/8.6, log KCa -2.13/-3 (as read)."),
+    ("LoftsTippingHamiltonTaylor2008", "Lofts S, Tipping E, Hamilton-Taylor J", 2008,
+     "The chemical speciation of Fe(III) in freshwaters", "Aquatic Geochemistry 14 (not verified)", "",
+     "WHAM-based Fe(III) speciation and solubility in fresh waters vs pH (Fe is a requested cation)." + NV,
+     "not_accessed", "Modelled dissolved Fe(III) vs pH (figures)."),
+    ("TippingLoftsLawlor1998", "Tipping E, Lofts S, Lawlor AJ", 1998,
+     "Modelling the chemical speciation of trace metals in the surface waters of the Humber system",
+     "Science of the Total Environment 210/211 (not verified)", "",
+     "WHAM applied to many river samples spanning a pH range; predicted free-ion fractions." + NV,
+     "not_accessed", "Predicted free-ion fractions vs pH across samples (figures/tables)."),
+    ("LoftsTipping2000", "Lofts S, Tipping E", 2000,
+     "Solid-solution metal partitioning in the Humber rivers: application of WHAM and SCAMP",
+     "Science of the Total Environment 251/252 (not verified)", "",
+     "Model (WHAM/SCAMP) predictions of dissolved vs particulate metal in rivers; pH dependence of partitioning." + NV,
+     "not_accessed", "Predicted dissolved fractions or Kd vs pH (figures)."),
+    ("Stockdale2010", "Stockdale A, Tipping E, Lofts S, Ormerod SJ, Clements WH, Blust R", 2010,
+     "Toxicity of proton-metal mixtures in the field: linking stream macroinvertebrate species diversity to chemical "
+     "speciation and bioavailability", "Aquatic Toxicology 100 (not verified)", "",
+     "WHAM-FTOX: pH and metal speciation effects in streams." + NV, "not_accessed", "Modelled toxic units vs pH."),
+    ("Bryan2002", "Bryan SE, Tipping E, Hamilton-Taylor J", 2002,
+     "Comparison of measured and modelled copper binding by natural organic matter in freshwaters",
+     "Comparative Biochemistry and Physiology C 133 (not verified)", "",
+     "Commonly cited basis for the WHAM convention that 65% of DOM (DOM = 2 x DOC) behaves as active fulvic acid." + NV,
+     "not_accessed", "Measured vs WHAM-predicted Cu2+; the DOC conversion convention."),
+    ("Weng2002WR", "Weng L, Temminghoff EJM, van Riemsdijk WH", 2002,
+     "Aluminum speciation in natural waters: measurement using Donnan membrane technique and modeling using NICA-Donnan",
+     "Water Research 36 (not verified)", "",
+     "Measured (DMT) and NICA-Donnan-predicted free Al3+ in natural waters over a pH range (Al is a requested cation)." + NV,
+     "not_accessed", "Per-sample pH, measured and predicted Al3+ (tables?)."),
+    ("Ahmed2013", "Ahmed IAM, Hamilton-Taylor J, Lofts S, Meeussen JCL, Lin C, Zhang H, Davison W", 2013,
+     "Testing copper-speciation predictions in freshwaters over a wide range of metal-organic matter ratios",
+     "Environmental Science & Technology 47 (not verified)", "",
+     "WHAM VII and NICA-Donnan predictions of Cu2+ tested against measurements in fresh waters." + NV,
+     "not_accessed", "Measured vs predicted Cu2+ with sample pH."),
+    ("Mueller2012", "Mueller KK, Lofts S, Fortin C, Campbell PGC", 2012,
+     "Trace metal speciation predictions in natural aquatic systems: incorporation of dissolved organic matter (DOM) "
+     "spectroscopic quality", "Environmental Chemistry 9 (not verified)", "",
+     "WHAM predictions vs measured free Cd, Ni, Zn in lakes spanning a pH range." + NV,
+     "not_accessed", "Per-lake pH, DOC, measured and predicted free ions."),
+    ("VanGeen1994", "Van Geen A, Robertson AP, Leckie JO", 1994,
+     "Complexation of carbonate species at the goethite surface: implications for adsorption of metal ions in natural "
+     "waters", "Geochimica et Cosmochimica Acta 58 (not verified)", "",
+     "Carbonate surface complexation and its effect on metal adsorption; basis of the carbonate constants re-optimised for "
+     "HFO in the PHREEQC databases." + NV, "not_accessed", "Metal adsorption vs pH at different pCO2 (figures)."),
+    ("Mahoney2009", "Mahoney JJ, Cadle SA, Jakubowski RT", 2009,
+     "Uranyl adsorption onto hydrous ferric oxide - a re-evaluation for the diffuse layer model database",
+     "Environmental Science & Technology 43 (not verified)", "",
+     "Diffuse-layer (D&M-style) U(VI) constants including carbonate species; would allow U to be added to Part B." + NV,
+     "not_accessed", "U(VI) constants and edges vs pH/pCO2."),
+    ("Gustafsson2001SHM", "Gustafsson JP", 2001,
+     "Modeling the acid-base properties and metal complexation of humic substances with the Stockholm Humic Model",
+     "Journal of Colloid and Interface Science 244 (not verified)", "",
+     "Stockholm Humic Model (the Visual MINTEQ alternative to NICA-Donnan)." + NV,
+     "not_accessed", "SHM parameters; binding vs pH figures."),
+    ("Sigg2006", "Sigg L, et al.", 2006,
+     "Comparison of analytical techniques for dynamic trace metal speciation in natural freshwaters",
+     "Environmental Science & Technology 40 (not verified)", "",
+     "Measurement companion to Unsworth et al. 2006 (same sites)." + NV, "not_accessed", "Measured labile/free metal."),
+]
+
+
+def main():
+    rows = ex8_rows() + QUAL_ROWS
+    sl = pd.DataFrame(rows)[SLOPE_COLS]
+    sl.to_csv(os.path.join(EXT, "models_lit_slopes.csv"), index=False)
+    cand = pd.DataFrame(CANDIDATES, columns=CAND_COLS)
+    assert cand.study_id.is_unique
+    cand.to_csv(os.path.join(EXT, "models_lit_candidates.csv"), index=False)
+    print(sl[["study_id", "metal", "measure", "pH_min", "pH_max", "n", "slope", "slope_se", "r", "quality"]].to_string())
+    print(f"candidates: {len(cand)}")
+
+
+if __name__ == "__main__":
+    main()
